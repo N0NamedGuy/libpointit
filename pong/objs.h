@@ -4,7 +4,7 @@
 #include "SDL/SDL.h"
 #include "ball.h"
 #include "pad.h"
-#include "particle.h"
+#include "../common/particle.h"
 
 extern Ball b;
 extern Pad p1;

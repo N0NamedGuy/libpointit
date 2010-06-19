@@ -14,8 +14,8 @@
 #include "objs.h"
 
 #include "audio.h"
-#include "thread.h"
-#include "pointit.h"
+#include "../common/thread.h"
+#include "../pointit/pointit.h"
 #include "utils.h"
 #include "init.h"
 

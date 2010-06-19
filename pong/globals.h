@@ -2,7 +2,7 @@
 #define GLOBALS_H
 
 #include <iostream>
-#include "pointit.h"
+#include "../pointit/pointit.h"
 #include "SDL/SDL.h"
 #include "SDL/SDL_ttf.h"
 

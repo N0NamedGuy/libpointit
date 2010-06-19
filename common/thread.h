@@ -1,7 +1,7 @@
 #ifndef THREAD_H
 #define THREAD_H
 #include <pthread.h>
-#include "pointit.h"
+#include "../pointit/pointit.h"
 
 extern void *go_detect_thread(void* ptr);
 

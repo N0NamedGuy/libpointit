@@ -2,7 +2,7 @@
 #define INIT_H
 #include <iostream>
 #include "globals.h"
-#include "thread.h"
+#include "../common/thread.h"
 #include "utils.h"
 #include "objs.h"
 

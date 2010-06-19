@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -Wall -O3
 LDFLAGS=-I/usr/include/opencv -lcv -lcvaux -lhighgui -lSDL -lSDL_image -lSDL_gfx -lpthread -lm
-SOURCES=draw.cpp thread.cpp pointit.cpp particle.cpp shapeengine.cpp
+SOURCES=draw.cpp ../common/thread.cpp pointit.cpp ../common/particle.cpp shapeengine.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=draw
 
