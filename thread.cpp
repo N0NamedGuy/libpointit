@@ -1,0 +1,25 @@
+#include "thread.h"
+pthread_t detect_thread;
+
+bool *proceed_ptr;
+
+void *go_detect_thread(void* ptr) {
+  //  int cnt = 0;
+  //while (!quit) printf("Iter:%d\n",cnt++);
+
+  while((*proceed_ptr)) 
+    reinterpret_cast<PointIt *>(ptr)->do_detect();
+  
+
+  return 0;
+}
+
+void init_thread(PointIt* pntIt, bool* proceed_flag) {
+  proceed_ptr = proceed_flag;
+  pthread_create( &detect_thread, NULL, go_detect_thread, pntIt);
+}
+
+void thread_wait() {
+  *proceed_ptr = false;
+  pthread_join( detect_thread, NULL);
+}
