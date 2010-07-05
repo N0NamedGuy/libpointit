@@ -53,6 +53,10 @@ class PointIt {
   int detected_diff_x;
   int detected_diff_y;
 
+  // Step for improved performance
+  int step_x;
+  int step_y;
+
   int w,h;
 #ifdef USING_CV
   // Our webcam handle
@@ -88,3 +92,5 @@ public:
 
 
 #endif
+
+// vim:ts=2:expandtab:cindent

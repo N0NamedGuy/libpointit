@@ -124,7 +124,8 @@ PointIt::PointIt() {
 
   err = 0;
 
-
+  step_x = TOLERANCE / 4;
+  step_y = TOLERANCE / 4;
   //  toggle_cam();
 }
 
@@ -225,39 +226,42 @@ void PointIt::do_detection(camImg* img) {
 
   int x,y;
 
-  for (i = 0; i < img->width; i++ ) {
-    for (j = 0; j < img->height; j++) {
+  for (i = 0; i < img->width; i += step_x) {
+    for (j = 0; j < img->height; j += step_y) {
       if (is_color(img,i,j)) {
-	num_pixels++;
+        
+        num_pixels++;
 
-	if (num_pixels > TOLERANCE) {
-	  l = i;
-	  get_out = 1;
-	  break;
-	}
+        if (num_pixels > TOLERANCE) {
+          l = i;
+	        get_out = 1;
+	        break;
+	      }
       }
     }
     if (get_out) break;
   }
 
   if (!get_out) {
+    if (step_x >= (TOLERANCE / 4)) step_x /= 2;
+    if (step_y >= (TOLERANCE / 4)) step_y /= 2;
     return;
   }
 
   num_pixels = 0;
   get_out = 0;
 
-  for (i = img->width - 1; i >= 0 ; i-- ) {
-    for (j = 0; j < img->height; j++) {
+  for (i = img->width - 1; i >= 0 ; i -= step_x ) {
+    for (j = 0; j < img->height; j += step_y) {
 
       if (is_color(img,i,j)) {
-	num_pixels++;
+        num_pixels++;
 
-	if (num_pixels > TOLERANCE) {
-	  r = i;
-	  get_out = 1;
-	  break;
-	}
+        if (num_pixels > TOLERANCE) {
+          r = i;
+	        get_out = 1;
+	        break;
+	      }
       }
     }
     if (get_out) break;
@@ -265,16 +269,16 @@ void PointIt::do_detection(camImg* img) {
 
   num_pixels = 0;
   get_out = 0;
-  for (i = 0; i < img->height; i++ ) {
-    for (j = 0; j < img->width; j++) {
+  for (i = 0; i < img->height; i += step_y ) {
+    for (j = 0; j < img->width; j += step_x) {
       if (is_color(img,j,i)) {
-	num_pixels++;
+        num_pixels++;
 
-	if (num_pixels > TOLERANCE) {
-	  t = i;
-	  get_out = 1;
-	  break;
-	}
+	      if (num_pixels > TOLERANCE) {
+	        t = i;
+	        get_out = 1;
+	        break;
+	      }
       }
     }
     if (get_out) break;
@@ -282,16 +286,16 @@ void PointIt::do_detection(camImg* img) {
 
   num_pixels = 0;
   get_out = 0;
-  for (i = img->height-1; i >= 0; i--) {
-    for (j = 0; j < img->width; j++) {
+  for (i = img->height-1; i >= 0; i -= step_y) {
+    for (j = 0; j < img->width; j += step_x) {
       if (is_color(img,j,i)) {
-	num_pixels++;
+        num_pixels++;
 
-	if (num_pixels > TOLERANCE) {
-	  b = i;
-	  get_out = 1;
-	  break;
-	}
+        if (num_pixels > TOLERANCE) {
+          b = i;
+	        get_out = 1;
+	        break;
+	      }
       }
     }
     if (get_out) break;
@@ -304,7 +308,7 @@ void PointIt::do_detection(camImg* img) {
       && (r-l < MAX_DIFF && b-t < MAX_DIFF)
       && (   (detected_x == -1 && detected_y == -1) ||
 	     (dist(x,y,detected_x,detected_y) <= MAX_DIST)
-	 )
+	      )
       ) {
 
     detected_diff_x = x - detected_x;
@@ -312,6 +316,17 @@ void PointIt::do_detection(camImg* img) {
 
     detected_x = x;
     detected_y = y;
+
+    step_x *= 2;
+    step_y *= 2;
+
+    if (step_x >= (r-l) / 2) {
+      step_x /= 2;
+    }
+
+    if (step_y >= (b-t) / 2) {
+      step_y /= 2;
+    }
 
     if (showlines) {
 #ifdef USING_CV
@@ -322,6 +337,9 @@ void PointIt::do_detection(camImg* img) {
 #endif
     }
 
+  } else {
+    if (step_x >= (TOLERANCE / 4)) step_x /= 2;
+    if (step_y >= (TOLERANCE / 4)) step_y /= 2;
   }
 
 }
@@ -348,9 +366,10 @@ void PointIt::do_detect() {
 
     // Save memory...
     cvReleaseImage(&to_process);
-    //count_fps();
+    count_fps();
 
-    //printf("FPS: %d\n",get_fps());
+    printf("FPS: %d\n",get_fps());
+    printf("Step_x: %d Step_y: %d\n",step_x, step_y);
 
     // Do not release the frame!
 
@@ -384,3 +403,5 @@ int PointIt::get_width() {
 int PointIt::get_height() {
   return h;
 }
+
+// vim:ts=2:expandtab:cindent

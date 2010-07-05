@@ -323,3 +323,5 @@ int main() {
 
   return 0;
 }
+
+// vim:ts=2:expandtab:cindent
