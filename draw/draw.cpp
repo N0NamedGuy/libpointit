@@ -20,11 +20,11 @@
 #include "SDL/SDL_image.h"
 #include "SDL/SDL_gfxPrimitives.h"
 
-#include "../pointit.h"
-#include "../thread.h"
-#include "../particle.h"
-#include "button.h"
-#include "utils.h"
+#include "../pointit/pointit.h"
+#include "../common/thread.h"
+#include "../common/particle.h"
+#include "../common/button.h"
+#include "../common/utils.h"
 
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
