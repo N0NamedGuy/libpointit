@@ -366,10 +366,10 @@ void PointIt::do_detect() {
 
     // Save memory...
     cvReleaseImage(&to_process);
-    count_fps();
+    //count_fps();
 
-    printf("FPS: %d\n",get_fps());
-    printf("Step_x: %d Step_y: %d\n",step_x, step_y);
+    //printf("FPS: %d\n",get_fps());
+    //printf("Step_x: %d Step_y: %d\n",step_x, step_y);
 
     // Do not release the frame!
 
