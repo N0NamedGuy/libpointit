@@ -1,0 +1,59 @@
+\documentclass[a4paper,oneside]{article}
+
+\usepackage{fancyhdr}
+\usepackage[pdftex,colorlinks]{hyperref}
+\usepackage[portuguese]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\selectlanguage{portuguese}
+
+\hypersetup{
+  pdfauthor={David Serrano},
+  pdfkeywords={pointit, libpointit, color recognition, 
+    ejc, ajc, ejc2010},
+  pdftitle={libpointit},
+  pdfsubject={Pointit Library},
+    colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=black,
+  filecolor=black
+}
+
+\title{PointIt Library - libpointit}
+       \author{David Miguel de Araújo Serrano}
+%\thispagestyle{empty}
+%\addtocounter{page}{-1}
+
+\begin{document}
+\maketitle
+
+Este software é uma biblioteca que permite aos programas que a
+usem fazer reconhecimento de cor de objectos, através de uma
+\emph{webcam} ou de outro dispositivo equivalente.
+
+Após a detecção das coordenadas espaciais de um objecto de determinada cor
+(por omissão, verde), o programa que use {{\bf \emph{libpointit}} poderá usar
+a informação das coordenadas e do tamanho do objecto em questão conforme
+entender. Uma prática comum por parte desses programas clientes será a
+reposição de, por exemplo, um cursor do rato.
+
+Todas as aplicações que venham a usar a biblioteca {\bf \emph{Point It}}
+poderão tomar partido de novos paradigmas no desenho de GUIs (do inglês,
+\emph{Graphical User Interfaces}), de novas formas de interacção com
+videojogos e uma melhor acessibilidade para pesosas com deficiências.
+Estas são apenas algumas das vantagens que as aplicações que usem a
+{\bf \emph{libpointit}} passam a ter, para além de outras que não foram aqui
+mencionadas.
+
+A melhor característica da {\bf \emph{libpointit}} é a possibilidade do uso
+de objectos do nosso dia-a-dia. Basta usar qualquer objecto, e movê-lo em frente
+à \emph{webcam} (desde que este seja da cor para a qual a {\bf \emph{libpointit}}
+está configurada para reconhecer).
+
+Esta biblioteca é \emph{open-source} (de código aberto), e completamente
+livre (pode-se alterar e redistribuir, de acordo com a licença \emph{GPL})
+este \emph{software}, e está disponível para download em
+http://github.com/N0NamedGuy/libpointit
+\end{document}
