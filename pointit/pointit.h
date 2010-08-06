@@ -17,80 +17,22 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define USING_CV
+#include "color.h"
 
-#ifdef USING_CV
-#include "cv.h"
-#include "highgui.h"
-#define camImg IplImage
+#define USING_V4L2
+#ifdef USING_V4L2
+#include "v4l2/v4l2grabber.h"
 #endif
 
+extern static int pointit_init(void); 
+extern static int pointit_destroy(void); 
+extern static int pointit_detect(void); 
+extern static int pointit_toggle_cam(void); 
 
-//#define SHOWCAM
-
-class PointIt {
-  int err;
-
-  int TOLERANCE;
-  int MAX_DIFF;
-  int MAX_DIST;
-
-  int POINT_W;
-
-  int showcam;
-  int showlines;
-  // FPS Measuring
-  time_t last_seconds;
-  int fps;
-  int last_fps;
-
-
-  // Detected coordinates
-  int detected_x;
-  int detected_y;
-
-  // Detected differences
-  int detected_diff_x;
-  int detected_diff_y;
-
-  // Step for improved performance
-  int step_x;
-  int step_y;
-
-  int w,h;
-#ifdef USING_CV
-  // Our webcam handle
-  CvCapture *capture;
-#endif
-
-private:
-  int is_color(camImg* img, int x, int y);
-  void count_fps();
-  void do_detection(camImg* img);
-  
-
-#ifdef USING_CV
-  void init_cv();
-#endif
-
-public:
-  PointIt();
-  ~PointIt();
-  void do_detect();
-  int get_x() { return detected_x; }
-  int get_y() { return detected_y; }
-  int get_diff_x() { return detected_diff_x; }
-  int get_diff_y() { return detected_diff_y; }
-  int get_fps() { return last_fps; }
-  void toggle_cam();
-  int get_error();
-  void toggle_lines();
-
-  int get_width();
-  int get_height();
-};
-
-
-#endif
-
+extern static int pointit_get_x(void); 
+extern static int pointit_get_y(void); 
+extern static int pointit_get_diff_x(void); 
+extern static int pointit_get_diff_y(void); 
+extern static int pointit_get_width(void); 
+extern static int pointit_get_height(void); 
 // vim:ts=2:expandtab:cindent

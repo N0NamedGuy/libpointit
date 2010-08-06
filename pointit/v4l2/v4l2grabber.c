@@ -328,3 +328,13 @@ struct hsv_color pointit_color(int x, int y) {
         return yuv_to_hsv(y0, u, v);
     }
 }
+
+static void pointit_show_cam(void) {
+    /* FIXME: Do me */
+    printf("Do me! Show cam!");
+}
+
+static void pointit_hide_cam(void) {
+    /* FIXME: Do me */
+    printf("Do me! Hide cam!");
+}
