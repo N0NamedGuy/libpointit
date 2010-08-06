@@ -24,15 +24,15 @@
 #include "v4l2/v4l2grabber.h"
 #endif
 
-extern static int pointit_init(void); 
-extern static int pointit_destroy(void); 
-extern static int pointit_detect(void); 
-extern static int pointit_toggle_cam(void); 
+extern int pointit_init(void); 
+extern int pointit_destroy(void); 
+extern void pointit_detect(void); 
+extern void pointit_toggle_cam(void); 
+extern int pointit_get_x(void); 
+extern int pointit_get_y(void); 
+extern int pointit_get_diff_x(void); 
+extern int pointit_get_diff_y(void); 
+extern int pointit_get_width(void); 
+extern int pointit_get_height(void); 
 
-extern static int pointit_get_x(void); 
-extern static int pointit_get_y(void); 
-extern static int pointit_get_diff_x(void); 
-extern static int pointit_get_diff_y(void); 
-extern static int pointit_get_width(void); 
-extern static int pointit_get_height(void); 
-// vim:ts=2:expandtab:cindent
+#endif

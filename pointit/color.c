@@ -1,6 +1,6 @@
 #include "color.h"
 
-struct hsv_color rgb_to_hsv(rgb_color rgb) {
+struct hsv_color rgb_to_hsv(struct rgb_color rgb) {
     float r = ((float)(rgb.r) / 255);
     float g = ((float)(rgb.g) / 255);
     float b = ((float)(rgb.b) / 255);
@@ -11,7 +11,7 @@ struct hsv_color rgb_to_hsv(rgb_color rgb) {
     
     double maxC;
     double minC;
-    double delta = maxC - minC;
+    double delta;
 
     double dR;
     double dG;
@@ -27,6 +27,7 @@ struct hsv_color rgb_to_hsv(rgb_color rgb) {
     if (minC > r) minC = r;
 
     v = maxC;
+    delta = maxC - minC;
 
     if (delta == 0) {
         h = 0;
@@ -37,7 +38,7 @@ struct hsv_color rgb_to_hsv(rgb_color rgb) {
         dG = 60*(maxC - g) / delta + 180;
         dB = 60*(maxC - b) / delta + 180;
 
-        if (r = maxC) {
+        if (r == maxC) {
             h = dB - dG;
         } else if (g == maxC) {
             h = 120 + dR - dB;
@@ -58,4 +59,5 @@ struct hsv_color rgb_to_hsv(rgb_color rgb) {
 
     }
 
+    return hsv;
 }

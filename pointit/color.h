@@ -8,10 +8,10 @@ struct hsv_color {
 };
 
 struct rgb_color {
-    int r,
-    int g,
-    int b
+    int r;
+    int g;
+    int b;
 };
 
-extern struct hsv_color rgb_to_hsv(rgb_color rgb);
+extern struct hsv_color rgb_to_hsv(struct rgb_color rgb);
 #endif

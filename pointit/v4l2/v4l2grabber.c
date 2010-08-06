@@ -16,6 +16,7 @@
 
 #include <linux/videodev2.h>
 
+#include "v4l2grabber.h"
 #include "../color.h"
 
 #define CLEAR(x) memset (&(x), 0, sizeof(x))
@@ -23,7 +24,7 @@
 struct buffer {
     void * start;
     size_t length;
-}
+};
 
 static char*        dev_name    = NULL;
 static int          fd          = -1;
@@ -33,7 +34,7 @@ static unsigned int n_buffers   = 0;
 static int width = 0;
 static int height = 0;
 
-static char* yuv_bitmap = NULL
+static char* yuv_bitmap = NULL;
 
 static int xioctl(int fd, int req, void* arg) {
     int r;
@@ -110,7 +111,7 @@ int init_mmap() {
                 MAP_SHARED,
                 fd, buf.m.offset);
 
-        if (buffers[n_buffers].start = MAP_FAILED) {
+        if (buffers[n_buffers].start == MAP_FAILED) {
             /* mmap did not work :( */
             return -1;
         }
@@ -125,7 +126,6 @@ int init_device() {
     struct v4l2_cropcap cropcap;
     struct v4l2_crop crop;
     struct v4l2_format fmt;
-    unsigned int min;
 
     if (xioctl(fd, VIDIOC_QUERYCAP, &cap) == -1) {
         /* The device is not a V4L2 device */
@@ -194,7 +194,7 @@ int start_cap() {
     return 0;
 }
 
-static int pointit_init_cap(int w, int h) {
+int pointit_init_cap(int w, int h) {
     dev_name = "/dev/video";
     if (open_device() == -1) return -1;
 
@@ -203,13 +203,14 @@ static int pointit_init_cap(int w, int h) {
 
     if (init_device() == -1) return -1;
     
+    return 0;
 }
 
-static int pointit_destroy_cap(void) {
+int pointit_destroy_cap(void) {
     unsigned int i;
     for (i = 0; i < n_buffers; i++) {
         /* Won't check for errors, because we're quitting, and I don't really care... */
-        munmap(buffers[i].start, buffers[i].length)
+        munmap(buffers[i].start, buffers[i].length);
     }
     free(buffers);
 
@@ -223,7 +224,6 @@ static int pointit_destroy_cap(void) {
 
 static int get_frame() {
     struct v4l2_buffer buf;
-    unsigned int i;
 
     CLEAR(buf);
 
@@ -245,10 +245,10 @@ static int get_frame() {
     return 0;
 }
 
-static int pointit_capture(void) {
+int pointit_capture(void) {
     for (;;) {
         fd_set fds;
-        struct timeval vl;
+        struct timeval tv;
         int r;
         int ret;
 
@@ -261,7 +261,7 @@ static int pointit_capture(void) {
         r = select(fd + 1, &fds, NULL, NULL, &tv);
         
         if (r == -1) {
-            if (errno = EINTR) {
+            if (errno == EINTR) {
                 continue;
             }
 
@@ -282,7 +282,6 @@ static int pointit_capture(void) {
 }
 
 struct hsv_color yuv_to_hsv(int y, int u, int v) {
-    int h, s, l;
     struct rgb_color rgb;
 
     /* Convert YUV to RGB */
@@ -301,40 +300,37 @@ struct hsv_color yuv_to_hsv(int y, int u, int v) {
     return rgb_to_hsv(rgb);
 }
 
-struct hsv_color pointit_color(int x, int y) {
-    unsigned int in, out = 0;
+struct hsv_color pointit_get_color(int x, int y) {
+    unsigned int pos = (y * width) + x; 
     unsigned int pixel_16;
-    unsigned char pixel_24[3];
-    unsigned int pixel32;
     int y0, u, y1, v;
     
-    in = (y * width) + x; 
 
     /* I hope the compiler optimizes this... */
     pixel_16 =
-        yuv_bitmap[in + 3] << 24 |
-        yuv_bitmap[in + 2] << 16 |
-        yuv_bitmap[in + 1] <<  8 |
-        yuv_bitmap[in + 0];
+        yuv_bitmap[pos + 3] << 24 |
+        yuv_bitmap[pos + 2] << 16 |
+        yuv_bitmap[pos + 1] <<  8 |
+        yuv_bitmap[pos + 0];
 
         y0 = (pixel_16 & 0x000000ff);
         u  = (pixel_16 & 0x0000ff00) >> 8;
         y1 = (pixel_16 & 0x00ff0000) >> 16;
         v  = (pixel_16 & 0xff000000) >> 24;
         
-    if (in % 2 == 0) {
+    if (pos % 2 == 0) {
         return yuv_to_hsv(y1, u, v);
     } else {
         return yuv_to_hsv(y0, u, v);
     }
 }
 
-static void pointit_show_cam(void) {
+void pointit_show_cam(void) {
     /* FIXME: Do me */
     printf("Do me! Show cam!");
 }
 
-static void pointit_hide_cam(void) {
+void pointit_hide_cam(void) {
     /* FIXME: Do me */
     printf("Do me! Hide cam!");
 }

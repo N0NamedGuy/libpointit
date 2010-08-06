@@ -9,10 +9,14 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of 
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
 // GNU General Public License for more details. 
+
+#include <math.h>
+
 #include "pointit.h"
 #include "color.h"
-#define dist(x1,y1,x2,y2) (sqrt( ((x2-x1)*(x2-x1))	\
-				 + ((y2-y1)*(y2-y1)) ))
+
+#define dist(x1,y1,x2,y2) (sqrt( (((x2)-(x1))*((x2)-(x1)))	\
+				 + (((y2)-(y1))*((y2)-(y1))) ))
 
 #ifdef USING_V4L2
 #include "v4l2/v4l2grabber.h"
@@ -50,7 +54,7 @@ int step_y;
 
 int w,h;
 
-static int pointit_init(void) {
+int pointit_init(void) {
   TOLERANCE = 10;
   MAX_DIFF = 80;
   MAX_DIST = 800;
@@ -58,13 +62,13 @@ static int pointit_init(void) {
 
   //printf("Starting PointIt\n");
 
-  if (pointit_init_cap(640, 480) == -1) {
+  if (pointit_init_cap(WIDTH, HEIGHT) == -1) {
     printf("Couldn't init video device.\n");   
     return -1;
   }
 
-  detected_x = get_width() / 2;
-  detected_y = get_height() / 2;
+  detected_x = pointit_get_width() / 2;
+  detected_y = pointit_get_height() / 2;
   
   detected_diff_x = 0;
   detected_diff_y = 0;
@@ -84,13 +88,13 @@ static int pointit_init(void) {
   return 0;
 }
 
-static int pointit_destroy(void) {
+int pointit_destroy(void) {
   return pointit_destroy_cap();
 }
 
 
-static int pointit_is_color(int x, int y) {
-  struct hsv_color hsv = pointit_color(x, y);
+int pointit_is_color(int x, int y) {
+  struct hsv_color hsv = pointit_get_color(x, y);
  
   return 
     hsv.h >= 75 && hsv.h <= 140 && // For green
@@ -100,7 +104,7 @@ static int pointit_is_color(int x, int y) {
     hsv.s > 40 && hsv.v > 30;
 }
 
-static void pointit_count_fps(void) {
+void pointit_count_fps(void) {
   time_t cur_sec = time(NULL);
 
   if (cur_sec > last_seconds) {
@@ -112,7 +116,7 @@ static void pointit_count_fps(void) {
   fps++;
 }
 
-static void pointit_detect(void) {
+void pointit_detect(void) {
   int i,j;
   
   int l=-1,r=-1,t=-1,b=-1;
@@ -124,9 +128,9 @@ static void pointit_detect(void) {
 
   pointit_capture();
 
-  for (i = 0; i < img->width; i += step_x) {
-    for (j = 0; j < img->height; j += step_y) {
-      if (pointit_is_color(img,i,j)) {
+  for (i = 0; i < WIDTH; i += step_x) {
+    for (j = 0; j < HEIGHT; j += step_y) {
+      if (pointit_is_color(i,j)) {
         
         num_pixels++;
 
@@ -149,10 +153,10 @@ static void pointit_detect(void) {
   num_pixels = 0;
   get_out = 0;
 
-  for (i = img->width - 1; i >= 0 ; i -= step_x ) {
-    for (j = 0; j < img->height; j += step_y) {
+  for (i = WIDTH - 1; i >= 0 ; i -= step_x ) {
+    for (j = 0; j < HEIGHT; j += step_y) {
 
-      if (pointit_is_color(img,i,j)) {
+      if (pointit_is_color(i,j)) {
         num_pixels++;
 
         if (num_pixels > TOLERANCE) {
@@ -167,9 +171,9 @@ static void pointit_detect(void) {
 
   num_pixels = 0;
   get_out = 0;
-  for (i = 0; i < img->height; i += step_y ) {
-    for (j = 0; j < img->width; j += step_x) {
-      if (pointit_is_color(img,j,i)) {
+  for (i = 0; i < HEIGHT; i += step_y ) {
+    for (j = 0; j < WIDTH; j += step_x) {
+      if (pointit_is_color(j,i)) {
         num_pixels++;
 
 	      if (num_pixels > TOLERANCE) {
@@ -184,9 +188,9 @@ static void pointit_detect(void) {
 
   num_pixels = 0;
   get_out = 0;
-  for (i = img->height-1; i >= 0; i -= step_y) {
-    for (j = 0; j < img->width; j += step_x) {
-      if (pointit_is_color(img,j,i)) {
+  for (i = HEIGHT-1; i >= 0; i -= step_y) {
+    for (j = 0; j < WIDTH; j += step_x) {
+      if (pointit_is_color(j,i)) {
         num_pixels++;
 
         if (num_pixels > TOLERANCE) {
@@ -233,7 +237,7 @@ static void pointit_detect(void) {
 
 }
     
-static int pointit_toggle_cam() {
+void pointit_toggle_cam() {
   if (showcam)
     pointit_hide_cam();
   else
@@ -241,27 +245,27 @@ static int pointit_toggle_cam() {
   showcam = !showcam;
 }
 
-static int poinit_get_x() {
+int pointit_get_x(void) {
   return detected_x; 
 }
 
-static int poinit_get_y() {
+int pointit_get_y(void) {
   return detected_y; 
 }
 
-static int poinit_get_diff_x() {
+int pointit_get_diff_x(void) {
   return detected_diff_x; 
 }
 
-static int poinit_diff_y() {
+int pointit_get_diff_y(void) {
   return detected_diff_y;
 }
 
-static int pointit_get_width() {
+int pointit_get_width(void) {
   return w;
 }
 
-static int pointit_get_height() {
+int pointit_get_height(void) {
   return h;
 }
 
