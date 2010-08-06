@@ -202,7 +202,8 @@ int pointit_init_cap(int w, int h) {
     height = h;
 
     if (init_device() == -1) return -1;
-    
+    if (start_cap() == -1) return -1;
+   
     return 0;
 }
 

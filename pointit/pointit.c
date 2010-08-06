@@ -262,11 +262,11 @@ int pointit_get_diff_y(void) {
 }
 
 int pointit_get_width(void) {
-  return w;
+  return WIDTH;
 }
 
 int pointit_get_height(void) {
-  return h;
+  return HEIGHT;
 }
 
 // vim:ts=2:expandtab:cindent
