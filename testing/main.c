@@ -18,8 +18,9 @@ int main(void) {
     
     for (;;) {
         pointit_detect();
-
-        printf("Detected (%d %d)\n", pointit_get_x() , pointit_get_y());
+        
+        //if (pointit_get_diff_x() || pointit_get_diff_y())
+            printf("Detected (%d %d)\n", pointit_get_x() , pointit_get_y());
     }
 
     pointit_destroy();

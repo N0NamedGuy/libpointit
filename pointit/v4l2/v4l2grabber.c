@@ -21,6 +21,15 @@
 
 #define CLEAR(x) memset (&(x), 0, sizeof(x))
 
+#ifdef POINTIT_SDL
+#include "SDL/SDL.h"
+#define CAM_SCREEN_WIDTH 640
+#define CAM_SCREEN_HEIGHT 480
+#define CAM_SCREEN_BPP 32
+
+SDL_Surface *cam_surf;
+#endif
+
 struct buffer {
     void * start;
     size_t length;
@@ -34,7 +43,8 @@ static unsigned int n_buffers   = 0;
 static int width = 0;
 static int height = 0;
 
-static char* yuv_bitmap = NULL;
+static unsigned char* yuv_bitmap = NULL;
+static unsigned char* rgb_bitmap = NULL;
 
 static int xioctl(int fd, int req, void* arg) {
     int r;
@@ -43,6 +53,13 @@ static int xioctl(int fd, int req, void* arg) {
     while (-1 == r && EINTR == errno);
 
     return r;
+}
+
+static int clamp(double x) {
+    int r = x;
+    if      (r < 0)   return 0;
+    else if (r > 255) return 255;
+    else              return r;
 }
 
 int open_device() {
@@ -191,6 +208,9 @@ int start_cap() {
         return -1;
     }
 
+    /* Let's prepare the RGB bitmap */
+    rgb_bitmap = (unsigned char *)malloc(width * height * 3);
+
     return 0;
 }
 
@@ -214,6 +234,7 @@ int pointit_destroy_cap(void) {
         munmap(buffers[i].start, buffers[i].length);
     }
     free(buffers);
+    free(rgb_bitmap);
 
     /* Won't check for errors, for the reason metioned above */
     close(fd);
@@ -221,6 +242,51 @@ int pointit_destroy_cap(void) {
 
     /* Always a huge succes! */
     return 0;
+}
+
+static struct rgb_color yuv_to_rgb(unsigned char Y1, unsigned char Cb, unsigned char Cr) {
+    struct rgb_color rgb;
+
+    double r, g, b;
+    double y1, pb, pr;
+
+    y1 = (255 / 219.0) * (Y1 - 16);
+    pb = (255 / 224.0) * (Cb - 128);
+    pr = (255 / 224.0) * (Cr - 128);
+
+    r = 1.0 * y1 + 0     * pb + 1.402 * pr;
+    g = 1.0 * y1 - 0.344 * pb - 0.714 * pr;
+    b = 1.0 * y1 + 1.772 * pb + 0     * pr;
+
+    rgb.r = clamp(r);
+    rgb.g = clamp(g);
+    rgb.b = clamp(b);
+
+    return rgb;
+}
+
+static struct rgb_color get_rgbcolor(int x, int y, unsigned char* yuv_bmap) {
+    unsigned char Y1,Y2,Cr,Cb;
+    int Cr_start = width * height;
+    int Cb_start = Cr_start + (width * height / 4);
+
+    int p1, p2, p3, p4, p5, p6;
+    struct rgb_color rgb;
+    
+    p1 = (y * width) + (x);
+    p2 = ((y/2) * width/2) + (x/2) + Cr_start;
+    p3 = ((y/2) * width/2) + (x/2) + Cb_start;
+    p4=(y * width * 4 * 4) + (x * 4 * 2);
+
+    Y = yuv_bmap[p1];
+    Cr = yuv_bmap[p2];
+    Cb = yuv_bmap[p3];
+
+    return yuv_to_rgb(Y,Cr,Cb);
+}
+
+static void process_image(unsigned char* yuv_bmap) {
+    yuv_bitmap = yuv_bmap;
 }
 
 static int get_frame() {
@@ -241,7 +307,7 @@ static int get_frame() {
         }
     }
 
-    yuv_bitmap = (char *)(buffers[buf.index].start);
+    process_image((unsigned char *)(buffers[buf.index].start));
 
     return 0;
 }
@@ -282,48 +348,9 @@ int pointit_capture(void) {
     return 0;
 }
 
-struct hsv_color yuv_to_hsv(int y, int u, int v) {
-    struct rgb_color rgb;
-
-    /* Convert YUV to RGB */
-    rgb.r = y + (1.370705 * (v-128));
-    rgb.g = y - (0.698001 * (v-128)) - (0.33763 * (u - 128));
-    rgb.b = y + (1.732446 * (u-128));
-
-    if (rgb.r > 255) rgb.r = 255;
-    if (rgb.g > 255) rgb.g = 255;
-    if (rgb.b > 255) rgb.b = 255;
-    
-    if (rgb.r < 0) rgb.r = 0;
-    if (rgb.g < 0) rgb.g = 0;
-    if (rgb.b < 0) rgb.b = 0;
-
-    return rgb_to_hsv(rgb);
-}
 
 struct hsv_color pointit_get_color(int x, int y) {
-    unsigned int pos = (y * width) + x; 
-    unsigned int pixel_16;
-    int y0, u, y1, v;
-    
-
-    /* I hope the compiler optimizes this... */
-    pixel_16 =
-        yuv_bitmap[pos + 3] << 24 |
-        yuv_bitmap[pos + 2] << 16 |
-        yuv_bitmap[pos + 1] <<  8 |
-        yuv_bitmap[pos + 0];
-
-        y0 = (pixel_16 & 0x000000ff);
-        u  = (pixel_16 & 0x0000ff00) >> 8;
-        y1 = (pixel_16 & 0x00ff0000) >> 16;
-        v  = (pixel_16 & 0xff000000) >> 24;
-        
-    if (pos % 2 == 0) {
-        return yuv_to_hsv(y1, u, v);
-    } else {
-        return yuv_to_hsv(y0, u, v);
-    }
+    return rgb_to_hsv(get_rgbcolor(x,y,yuv_bitmap));
 }
 
 void pointit_show_cam(void) {

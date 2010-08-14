@@ -147,6 +147,7 @@ void pointit_detect(void) {
   if (!get_out) {
     if (step_x >= (TOLERANCE / 4)) step_x /= 2;
     if (step_y >= (TOLERANCE / 4)) step_y /= 2;
+    printf("OH SNAP!\n");
     return;
   }
 
