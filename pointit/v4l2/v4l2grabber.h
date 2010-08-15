@@ -12,6 +12,7 @@ extern void pointit_show_cam(void);
 extern void pointit_hide_cam(void);
 
 #ifdef POINTIT_SDL
+#include "SDL/SDL.h"
 extern SDL_Surface* pointit_sdlcam_surf(void);
 #endif
 #endif

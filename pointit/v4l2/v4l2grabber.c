@@ -24,6 +24,11 @@
 #include <asm/types.h>
 #include <linux/videodev2.h>
 
+#ifdef POINTIT_SDL
+#include "SDL/SDL.h"
+#endif
+
+
 #define CLEAR(x) memset(&(x), 0, sizeof(x) )
 
 struct buffer {
@@ -40,6 +45,10 @@ int cam_width, cam_height;
 
 static unsigned char* yuv_img;
 static unsigned char* rgb_img;
+
+#ifdef POINTIT_SDL
+SDL_Surface* cam_surf;
+#endif
 
 /*===========================================================================*/
 /*=  Util stuff                                                             =*/
@@ -65,6 +74,28 @@ static int clamp(int n) {
     else if (n > 255) return 255;
     else return n;
 }
+
+/*===========================================================================*/
+/*=  SDL Stuff                                                              =*/
+/*===========================================================================*/
+#ifdef POINTIT_SDL
+static int free_sdl_surf() {
+    SDL_FreeSurface(cam_surf);
+    return 0;
+}
+
+static int create_sdl_surf() {
+   
+    free_sdl_surf(); 
+    cam_surf = SDL_CreateRGBSurfaceFrom(rgb_img,
+        cam_width, cam_height,
+        24, cam_width * 3, 
+        0x0000ff, 0x00ff00, 0xff0000, 0x000000);
+
+    return 0;
+}
+#endif
+
 
 /*===========================================================================*/
 /*=  Image processing stuff                                                 =*/
@@ -140,6 +171,9 @@ static int convert_yuv_to_rgb_buffer(   unsigned char* yuv,
 static void process_image(const void* p) {
     yuv_img = (unsigned char*)p;
     convert_yuv_to_rgb_buffer(yuv_img, rgb_img, cam_width, cam_height);
+#ifdef POINTIT_SDL
+    create_sdl_surf();
+#endif
 }
 
 static int read_frame(void) {
@@ -422,6 +456,9 @@ int pointit_destroy_cap(void) {
     if (stop_capturing() != 0) return -1;
     if (uninit_device() != 0)  return -1;
     if (close_device() != 0)   return -1;
+#ifdef POINTIT_SDL
+    free_sdl_surf();
+#endif
 
     free(rgb_img);
 
@@ -439,8 +476,6 @@ struct hsv_color pointit_get_color(int x, int y) {
     rgb.g = rgb_img[x + (y * cam_width) + 1];
     rgb.b = rgb_img[x + (y * cam_width) + 2];
 
-    printf("R: %d G: %d B: %d\n", rgb.r, rgb.g, rgb.b);
-
     return rgb_to_hsv(rgb);
 }
 
@@ -453,3 +488,9 @@ void pointit_hide_cam(void) {
     /* FIXME: Do me */
     printf("Do me! Hide cam!");
 }
+
+#ifdef POINTIT_SDL
+SDL_Surface* pointit_sdlcam_surf(void) {
+    return cam_surf;
+}
+#endif
