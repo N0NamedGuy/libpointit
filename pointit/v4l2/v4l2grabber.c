@@ -38,6 +38,9 @@ static unsigned int cam_n_buffers = 0;
 
 int cam_width, cam_height;
 
+static unsigned char* yuv_img;
+static unsigned char* rgb_img;
+
 /*===========================================================================*/
 /*=  Util stuff                                                             =*/
 /*===========================================================================*/
@@ -57,11 +60,86 @@ static int xioctl (int fd, int request, void* arg) {
     return r;   
 }
 
+static int clamp(int n) {
+    if (n < 0) return 0;
+    else if (n > 255) return 255;
+    else return n;
+}
+
 /*===========================================================================*/
 /*=  Image processing stuff                                                 =*/
 /*===========================================================================*/
+
+/* Copyright 2007 (c) Logitech. All Rights Reserved. (yuv -> rgb conversion) */
+/* There are some modified parts in this code */
+static int convert_yuv_to_rgb_pixel(int y, int u, int v) {
+    unsigned int pixel32 = 0;
+    unsigned char *pixel = (unsigned char*)&pixel32;
+    int r, g, b;
+
+    r = y + (1.370705 * (v - 128));
+    g = y - (0.698001 * (v - 128)) - (0.337633 * (u - 128));
+    b = y + (1.732446 + (u - 128));
+
+    r = clamp(r);
+    g = clamp(g);
+    b = clamp(b);
+
+    pixel[0] = r * 220 / 256;
+    pixel[1] = g * 220 / 256;
+    pixel[2] = b * 220 / 256;
+
+    return pixel32;
+}
+
+static int convert_yuv_to_rgb_buffer(   unsigned char* yuv,
+                                        unsigned char* rgb,
+                                        unsigned int width,
+                                        unsigned int height) {
+
+    unsigned int in, out = 0;
+    unsigned int pixel_16;
+    unsigned int pixel_24[3];
+    unsigned int pixel32;
+    int y0, u, y1, v;
+
+    for (in = 0; in < width * height * 2; in += 4) {
+        pixel_16 =
+            yuv[in + 3] << 24 |
+            yuv[in + 2] << 16 |
+            yuv[in + 1] <<  8 |
+            yuv[in + 0];
+
+        y0 = (pixel_16 & 0x000000ff);
+        u  = (pixel_16 & 0x0000ff00) >> 8;
+        y1 = (pixel_16 & 0x00ff0000) >> 16;
+        v  = (pixel_16 & 0xff000000) >> 24;
+
+        pixel32 = convert_yuv_to_rgb_pixel(y0, u, v);
+        pixel_24[0] = (pixel32 & 0x000000ff);
+        pixel_24[1] = (pixel32 & 0x0000ff00) >> 8;
+        pixel_24[2] = (pixel32 & 0x00ff0000) >> 16;
+
+        rgb[out++] = pixel_24[0];
+        rgb[out++] = pixel_24[1];
+        rgb[out++] = pixel_24[2];
+
+        pixel32 = convert_yuv_to_rgb_pixel(y1, u, v);
+        pixel_24[0] = (pixel32 & 0x000000ff);
+        pixel_24[1] = (pixel32 & 0x0000ff00) >> 8;
+        pixel_24[2] = (pixel32 & 0x00ff0000) >> 16;
+
+        rgb[out++] = pixel_24[0];
+        rgb[out++] = pixel_24[1];
+        rgb[out++] = pixel_24[2];
+
+    }
+    return 0;
+}
+
 static void process_image(const void* p) {
-    /* TODO: convert to RGB image */
+    yuv_img = (unsigned char*)p;
+    convert_yuv_to_rgb_buffer(yuv_img, rgb_img, cam_width, cam_height);
 }
 
 static int read_frame(void) {
@@ -330,6 +408,9 @@ int pointit_init_cap(int w, int h) {
     cam_height = h;
     cam_dev_name = "/dev/video"; 
 
+    /* Make room for an RGB bitmap */
+    rgb_img = malloc(cam_width * cam_height * 3); 
+
     if (open_device() != 0)     return -1;
     if (init_device() != 0)     return -1;
     if (start_capturing() != 0) return -1;
@@ -342,6 +423,8 @@ int pointit_destroy_cap(void) {
     if (uninit_device() != 0)  return -1;
     if (close_device() != 0)   return -1;
 
+    free(rgb_img);
+
     return 0;
 }
 
@@ -352,9 +435,12 @@ int pointit_capture(void) {
 
 struct hsv_color pointit_get_color(int x, int y) {
     struct rgb_color rgb;
-    rgb.r = 0;
-    rgb.g = 0;
-    rgb.b = 0;
+    rgb.r = rgb_img[x + (y * cam_width)];
+    rgb.g = rgb_img[x + (y * cam_width) + 1];
+    rgb.b = rgb_img[x + (y * cam_width) + 2];
+
+    printf("R: %d G: %d B: %d\n", rgb.r, rgb.g, rgb.b);
+
     return rgb_to_hsv(rgb);
 }
 
