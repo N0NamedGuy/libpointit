@@ -38,6 +38,10 @@ static unsigned int cam_n_buffers = 0;
 
 int cam_width, cam_height;
 
+/*===========================================================================*/
+/*=  Util stuff                                                             =*/
+/*===========================================================================*/
+
 static int errno_report(const char* s) {
     fprintf(stderr, "%s error %d, %s\n",
         s, errno, strerror(errno));
@@ -53,9 +57,71 @@ static int xioctl (int fd, int request, void* arg) {
     return r;   
 }
 
+/*===========================================================================*/
+/*=  Image processing stuff                                                 =*/
+/*===========================================================================*/
 static void process_image(const void* p) {
     /* TODO: convert to RGB image */
 }
+
+static int read_frame(void) {
+    struct v4l2_buffer buf;
+
+    CLEAR(buf);
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+
+    if (xioctl(cam_fd, VIDIOC_DQBUF, &buf)) {
+        switch (errno) {
+        case EAGAIN: return -1;
+
+        case EIO:
+        default: return errno_report("VIDIOC_DQBUF");
+        }
+    }
+
+    process_image(cam_buffers[buf.index].start);
+
+    if (xioctl(cam_fd, VIDIOC_QBUF, &buf) == -1) {
+        return errno_report("VIDIOC_QBUF");
+    }
+
+    return 0;
+}
+
+static int do_capture(void) {
+    fd_set fds;
+    struct timeval tv;
+    int r;
+
+    for (;;) { 
+        FD_ZERO(&fds);
+        FD_SET(cam_fd, &fds);
+
+        /* Timeout. */
+        tv.tv_sec = 2;
+        tv.tv_usec = 0;
+
+        r = select(cam_fd + 1, &fds, NULL, NULL, &tv);
+
+        if (r == -1) {
+            if (errno != EINTR) return errno_report("select");
+        }
+   
+        if (r == 0) {
+            fprintf(stderr, "select timeout\n");
+            return -1;
+        }
+
+        if (read_frame() == 0) break;
+    }
+
+    return 0;
+}
+
+/*===========================================================================*/
+/*=  Init/Destroy stuff                                                     =*/
+/*===========================================================================*/
 
 static int start_capturing(void) {
     unsigned int i;
@@ -117,7 +183,7 @@ static int init_mmap(void) {
     req.memory = V4L2_MEMORY_MMAP;
 
     if (xioctl(cam_fd, VIDIOC_REQBUFS, &req) == -1) {
-        if (errno = EINVAL) {
+        if (errno == EINVAL) {
             fprintf(stderr, "%s does not support memory mapping\n", cam_dev_name);
             return -1;
         } else {
@@ -185,7 +251,7 @@ static int init_device(void) {
 
     /* Using MMAP */
     if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
-        fprintf(stderr, "%s does not support streaming i/o\n");
+        fprintf(stderr, "%s does not support streaming i/o\n", cam_dev_name);
         return -1;  
     }
 
@@ -280,6 +346,7 @@ int pointit_destroy_cap(void) {
 }
 
 int pointit_capture(void) {
+    if (do_capture() != 0) return -1;
     return 0;
 }
 
