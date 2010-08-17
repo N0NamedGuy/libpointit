@@ -20,6 +20,8 @@
 
 #ifdef USING_V4L2
 #include "v4l2/v4l2grabber.h"
+#elif USING_CV
+#include "cv/cvgrabber.h"
 #endif
 
 #define WIDTH 640 

@@ -19,9 +19,10 @@
 
 #include "color.h"
 
-#define USING_V4L2
 #ifdef USING_V4L2
 #include "v4l2/v4l2grabber.h"
+#elif USING_CV
+#include "cv/cvgrabber.h"
 #endif
 
 extern int pointit_init(void); 
