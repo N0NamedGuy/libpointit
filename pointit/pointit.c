@@ -102,7 +102,8 @@ int pointit_destroy(void) {
 
 
 int pointit_is_color(int x, int y) {
-  struct hsv_color hsv = pointit_get_color(x, y);
+  struct hsv_color hsv;
+  hsv = pointit_get_color(x, y);
  
   return 
     hsv.h >= 75 && hsv.h <= 140 && // For green

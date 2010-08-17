@@ -479,7 +479,7 @@ struct hsv_color pointit_get_color(int x, int y) {
     struct rgb_color rgb;
     
     /* Mirrored x */
-    int mx = abs(cam_width - x);
+    int mx = x;
 
     rgb.r = rgb_img[(mx * 3) + (y * cam_width) + 2];
     rgb.g = rgb_img[(mx * 3) + (y * cam_width) + 1];
