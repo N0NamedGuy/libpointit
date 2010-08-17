@@ -46,6 +46,12 @@ int last_fps;
 int detected_x;
 int detected_y;
 
+// Detected lines
+int detected_l;
+int detected_r;
+int detected_t;
+int detected_b;
+
 // Detected differences
 int detected_diff_x;
 int detected_diff_y;
@@ -221,6 +227,11 @@ void pointit_detect(void) {
     detected_x = x;
     detected_y = y;
 
+    detected_l = l;
+    detected_r = r;
+    detected_t = t;
+    detected_b = b;
+
     step_x *= 2;
     step_y *= 2;
 
@@ -253,6 +264,22 @@ int pointit_get_x(void) {
 
 int pointit_get_y(void) {
   return detected_y; 
+}
+
+int pointit_get_left(void) {
+  return detected_l; 
+}
+
+int pointit_get_right(void) {
+  return detected_r;
+}
+
+int pointit_get_top(void) {
+  return detected_t;
+} 
+
+int pointit_get_bottom(void) {
+  return detected_b;
 }
 
 int pointit_get_diff_x(void) {

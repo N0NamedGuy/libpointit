@@ -10,6 +10,7 @@ CvCapture* capture;
 IplImage* frame;
 
 int pointit_init_cap(int w, int h) {
+    IplImage* tmp;
     capture = cvCaptureFromCAM(CV_CAP_ANY);
 
     if (!capture) return -1;
@@ -17,30 +18,28 @@ int pointit_init_cap(int w, int h) {
     cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_WIDTH, w);
     cvSetCaptureProperty( capture, CV_CAP_PROP_FRAME_HEIGHT, h);
     
-    frame = cvQueryFrame(capture);
+    tmp = cvQueryFrame(capture);
 
-    if (!frame) return -1;
+    if (!tmp) return -1;
+    frame = cvCloneImage(tmp);
 
     return 0;
 }
 
 int pointit_destroy_cap(void) {
-    cvReleaseImage(frame);
+    cvReleaseImage(&frame);
     cvReleaseCapture(&capture);    
-
     return 0;
 }
 
 int pointit_capture(void) {
     IplImage* tmp;
     
-    cvReleaseImage(frame);
-    
+    cvReleaseImage(&frame);
     tmp = cvQueryFrame(capture);
-    frame= cvCloneImage(tmp);
+    frame = cvCloneImage(tmp);
     cvFlip(tmp, frame, 1);
 
-    cvReleaseImage(tmp);
     
     return 0;
 };

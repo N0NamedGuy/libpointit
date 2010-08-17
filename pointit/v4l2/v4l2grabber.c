@@ -103,14 +103,19 @@ static int create_sdl_surf() {
 
 /* Copyright 2007 (c) Logitech. All Rights Reserved. (yuv -> rgb conversion) */
 /* There are some modified parts in this code */
+/* Adapted to conform fourcc.org standards */
 static int convert_yuv_to_rgb_pixel(int y, int u, int v) {
     unsigned int pixel32 = 0;
     unsigned char *pixel = (unsigned char*)&pixel32;
     int r, g, b;
 
-    r = y + (1.370705 * (v - 128));
-    g = y - (0.698001 * (v - 128)) - (0.337633 * (u - 128));
-    b = y + (1.732446 + (u - 128));
+    //r = y + (1.370705 * (v - 128));
+    //g = y - (0.698001 * (v - 128)) - (0.337633 * (u - 128));
+    //b = y + (1.732446 + (u - 128));
+    
+    r = (1.164 * (y - 16)) + (1.596 * (v - 128));
+    g = (1.164 * (y - 16)) - (0.813 * (v - 128)) - (0.391 * (u - 128));
+    b = (1.164 * (y - 16)) + (2.018 * (u - 128));
 
     r = clamp(r);
     g = clamp(g);
@@ -472,9 +477,13 @@ int pointit_capture(void) {
 
 struct hsv_color pointit_get_color(int x, int y) {
     struct rgb_color rgb;
-    rgb.r = rgb_img[x + (y * cam_width)];
-    rgb.g = rgb_img[x + (y * cam_width) + 1];
-    rgb.b = rgb_img[x + (y * cam_width) + 2];
+    
+    /* Mirrored x */
+    int mx = abs(cam_width - x);
+
+    rgb.r = rgb_img[(mx * 3) + (y * cam_width) + 2];
+    rgb.g = rgb_img[(mx * 3) + (y * cam_width) + 1];
+    rgb.b = rgb_img[(mx * 3) + (y * cam_width) + 0];
 
     return rgb_to_hsv(rgb);
 }

@@ -29,10 +29,18 @@ extern int pointit_init(void);
 extern int pointit_destroy(void); 
 extern void pointit_detect(void); 
 extern void pointit_toggle_cam(void); 
+
 extern int pointit_get_x(void); 
-extern int pointit_get_y(void); 
+extern int pointit_get_y(void);
+ 
+extern int pointit_get_left(void); 
+extern int pointit_get_right(void); 
+extern int pointit_get_top(void); 
+extern int pointit_get_bottom(void); 
+
 extern int pointit_get_diff_x(void); 
 extern int pointit_get_diff_y(void); 
+
 extern int pointit_get_width(void); 
 extern int pointit_get_height(void); 
 
