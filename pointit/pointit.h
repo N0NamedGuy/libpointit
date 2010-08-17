@@ -25,23 +25,31 @@
 #include "cv/cvgrabber.h"
 #endif
 
+struct pointit_context {
+    int x, y;        /* Detected coords */
+    int l, r, t, b;  /* Detected lines */
+    int dx, dy;      /* Detected diffs */
+    int w, h;        /* Detected width and height */
+
+    /* Tolerances */
+    int tolerance; /* How many correct pixels must be jumped */
+    int max_diff;  /* Max difference */
+    int max_dist;  /* Mas dist between lines */
+    int point_w;   /* Max pixel step */
+
+    /* Performance jumps */
+    int step_y;
+    int step_x;
+
+    /* Color ranges */
+    int min_h, max_h;
+    int min_s, max_s;
+    int min_v, max_v;
+};
+
 extern int pointit_init(void); 
 extern int pointit_destroy(void); 
-extern void pointit_detect(void); 
-extern void pointit_toggle_cam(void); 
-
-extern int pointit_get_x(void); 
-extern int pointit_get_y(void);
+extern void pointit_detect(struct pointit_context* context);
  
-extern int pointit_get_left(void); 
-extern int pointit_get_right(void); 
-extern int pointit_get_top(void); 
-extern int pointit_get_bottom(void); 
-
-extern int pointit_get_diff_x(void); 
-extern int pointit_get_diff_y(void); 
-
-extern int pointit_get_width(void); 
-extern int pointit_get_height(void); 
-
+extern struct pointit_context pointit_get_green_context();
 #endif

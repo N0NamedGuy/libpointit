@@ -10,6 +10,8 @@ SDL_Surface* screen = NULL;
 SDL_Surface* cam = NULL;
 SDL_Surface* target = NULL;
 
+struct pointit_context pointit;
+
 void sigtrap() {
     pointit_destroy();
     SDL_Quit();
@@ -43,7 +45,6 @@ void apply_surface(int x, int y, SDL_Surface* source, SDL_Surface* destination) 
   SDL_BlitSurface( source, NULL, destination, &offset);
 }
 
-
 int main(void) {
     int oldTicks, newTicks;
     int frames = 0;
@@ -56,6 +57,7 @@ int main(void) {
         printf("An error ocurred while starting pointit\n");
         return 0;
     }
+    pointit = pointit_get_green_context();
 
     signal(SIGINT, sigtrap);
     signal(SIGTERM, sigtrap);
@@ -64,7 +66,7 @@ int main(void) {
     newTicks = SDL_GetTicks();
     for (;;) {
         newTicks = SDL_GetTicks();
-        pointit_detect();
+        pointit_detect(&pointit);
 
 //        printf("%d, %d\n", pointit_get_x(), pointit_get_y());
         SDL_FillRect( SDL_GetVideoSurface(), NULL, 0 );
@@ -72,12 +74,15 @@ int main(void) {
         cam = pointit_sdlcam_surf();
         SDL_BlitSurface( cam, NULL, screen, NULL );
         
-        lineRGBA(screen, pointit_get_left(), 0, pointit_get_left(), screen->h, 0xff, 0x00, 0xff, 0xff);
-        lineRGBA(screen, pointit_get_right(), 0, pointit_get_right(), screen->h, 0xff, 0x00, 0xff, 0xff);
-        lineRGBA(screen, 0, pointit_get_top(), screen->w, pointit_get_top(), 0xff, 0x00, 0xff, 0xff);
-        lineRGBA(screen, 0, pointit_get_bottom(), screen->w, pointit_get_bottom(), 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, pointit.l , 0, pointit.l, screen->h, 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, pointit.r, 0, pointit.r, screen->h, 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, 0, pointit.t, screen->w, pointit.t, 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, 0, pointit.b, screen->w, pointit.b, 0xff, 0x00, 0xff, 0xff);
 
-        apply_surface(pointit_get_x() - (target->w / 2), pointit_get_y() - (target->h / 2), target, screen);
+        apply_surface(
+            ((pointit.x * 640) / pointit.w)  - (target->w / 2),
+            ((pointit.y * 480) / pointit.h) - (target->h / 2),
+            target, screen);
         SDL_Flip( screen );
 
         frames++;

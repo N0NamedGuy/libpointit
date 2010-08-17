@@ -26,6 +26,7 @@
 
 #ifdef POINTIT_SDL
 #include "SDL/SDL.h"
+#include "SDL/SDL_rotozoom.h"
 #endif
 
 
@@ -79,18 +80,23 @@ static int clamp(int n) {
 /*=  SDL Stuff                                                              =*/
 /*===========================================================================*/
 #ifdef POINTIT_SDL
+
 static int free_sdl_surf() {
     SDL_FreeSurface(cam_surf);
     return 0;
 }
 
 static int create_sdl_surf() {
+    SDL_Surface* tmp;
    
     free_sdl_surf(); 
-    cam_surf = SDL_CreateRGBSurfaceFrom(rgb_img,
+    tmp = SDL_CreateRGBSurfaceFrom(rgb_img,
         cam_width, cam_height,
         24, cam_width * 3, 
         0x0000ff, 0x00ff00, 0xff0000, 0x000000);
+    
+    cam_surf = SDL_DisplayFormat(tmp);
+    SDL_FreeSurface(tmp);
 
     return 0;
 }
@@ -458,11 +464,11 @@ struct hsv_color pointit_get_color(int x, int y) {
     struct rgb_color rgb;
     
     /* Mirrored x */
-    int mx = x;
+    int mx = abs(cam_width - x);
 
-    rgb.r = rgb_img[(x * 3) + (y * cam_width * 3)];
-    rgb.g = rgb_img[(x * 3) + (y * cam_width * 3) + 1];
-    rgb.b = rgb_img[(x * 3) + (y * cam_width * 3) + 2];
+    rgb.r = rgb_img[(mx * 3) + (y * cam_width * 3)];
+    rgb.g = rgb_img[(mx * 3) + (y * cam_width * 3) + 1];
+    rgb.b = rgb_img[(mx * 3) + (y * cam_width * 3) + 2];
 
     return rgb_to_hsv(rgb);
 }

@@ -24,75 +24,14 @@
 #include "cv/cvgrabber.h"
 #endif
 
-#define WIDTH 640 
-#define HEIGHT 480
-
-int err;
-
-int TOLERANCE;
-int MAX_DIFF;
-int MAX_DIST;
-
-int POINT_W;
-
-int showcam;
-int showlines;
-// FPS Measuring
-time_t last_seconds;
-int fps;
-int last_fps;
-
-// Detected coordinates
-int detected_x;
-int detected_y;
-
-// Detected lines
-int detected_l;
-int detected_r;
-int detected_t;
-int detected_b;
-
-// Detected differences
-int detected_diff_x;
-int detected_diff_y;
-
-// Step for improved performance
-int step_x;
-int step_y;
-
-int w,h;
+#define WIDTH 320 
+#define HEIGHT 240
 
 int pointit_init(void) {
-  TOLERANCE = 10;
-  MAX_DIFF = 80;
-  MAX_DIST = 800;
-  POINT_W = 20;
-
-  //printf("Starting PointIt\n");
-
   if (pointit_init_cap(WIDTH, HEIGHT) == -1) {
     printf("Couldn't init video device.\n");   
     return -1;
   }
-
-  detected_x = pointit_get_width() / 2;
-  detected_y = pointit_get_height() / 2;
-  
-  detected_diff_x = 0;
-  detected_diff_y = 0;
-
-  last_seconds = 0;
-  fps = 0;
-  last_fps = 0;
-
-  showcam = 0;
-  showlines = 0;
-
-  err = 0;
-
-  step_x = TOLERANCE / 4;
-  step_y = TOLERANCE / 4;
-
   return 0;
 }
 
@@ -101,31 +40,17 @@ int pointit_destroy(void) {
 }
 
 
-int pointit_is_color(int x, int y) {
+int pointit_is_color(struct pointit_context* context, int x, int y) {
   struct hsv_color hsv;
   hsv = pointit_get_color(x, y);
  
   return 
-    hsv.h >= 75 && hsv.h <= 140 && // For green
-    // hsv.h >= 240 - 30 && hsv.h <= 240 + 30 && // For "theorical" blue
-
-    // hsv.h <= 30 && hsv.h >= 330 && // For red
-    hsv.s > 40 && hsv.v > 30;
+    hsv.h >= context->min_h && hsv.h <= context->max_h && 
+    hsv.s >= context->min_s && hsv.s <= context->max_s &&
+    hsv.v >= context->min_v && hsv.v <= context->max_v;
 }
 
-void pointit_count_fps(void) {
-  time_t cur_sec = time(NULL);
-
-  if (cur_sec > last_seconds) {
-    last_seconds = cur_sec;
-    last_fps = fps;
-    fps = 0;
-  }
-
-  fps++;
-}
-
-void pointit_detect(void) {
+void pointit_detect(struct pointit_context* context) {
   int i,j;
   
   int l=-1,r=-1,t=-1,b=-1;
@@ -137,13 +62,13 @@ void pointit_detect(void) {
 
   pointit_capture();
 
-  for (i = 0; i < WIDTH; i += step_x) {
-    for (j = 0; j < HEIGHT; j += step_y) {
-      if (pointit_is_color(i,j)) {
+  for (i = 0; i < context->w; i += context->step_x) {
+    for (j = 0; j < context->h; j += context->step_y) {
+      if (pointit_is_color(context, i, j)) {
         
         num_pixels++;
 
-        if (num_pixels > TOLERANCE) {
+        if (num_pixels > context->tolerance) {
           l = i;
 	        get_out = 1;
 	        break;
@@ -154,21 +79,21 @@ void pointit_detect(void) {
   }
 
   if (!get_out) {
-    if (step_x >= (TOLERANCE / 4)) step_x /= 2;
-    if (step_y >= (TOLERANCE / 4)) step_y /= 2;
+    if (context->step_x >= (context->tolerance / 4)) context->step_x /= 2;
+    if (context->step_y >= (context->tolerance / 4)) context->step_y /= 2;
     return;
   }
 
   num_pixels = 0;
   get_out = 0;
 
-  for (i = WIDTH - 1; i >= 0 ; i -= step_x ) {
-    for (j = 0; j < HEIGHT; j += step_y) {
+  for (i = context->w - 1; i >= 0 ; i -= context->step_x ) {
+    for (j = 0; j < context->h; j += context->step_y) {
 
-      if (pointit_is_color(i,j)) {
+      if (pointit_is_color(context, i, j)) {
         num_pixels++;
 
-        if (num_pixels > TOLERANCE) {
+        if (num_pixels > context->tolerance) {
           r = i;
 	        get_out = 1;
 	        break;
@@ -180,12 +105,12 @@ void pointit_detect(void) {
 
   num_pixels = 0;
   get_out = 0;
-  for (i = 0; i < HEIGHT; i += step_y ) {
-    for (j = 0; j < WIDTH; j += step_x) {
-      if (pointit_is_color(j,i)) {
+  for (i = 0; i < context->h; i += context->step_y ) {
+    for (j = 0; j < context->w; j += context->step_x) {
+      if (pointit_is_color(context, j, i)) {
         num_pixels++;
 
-	      if (num_pixels > TOLERANCE) {
+	      if (num_pixels > context->tolerance) {
 	        t = i;
 	        get_out = 1;
 	        break;
@@ -197,12 +122,12 @@ void pointit_detect(void) {
 
   num_pixels = 0;
   get_out = 0;
-  for (i = HEIGHT-1; i >= 0; i -= step_y) {
-    for (j = 0; j < WIDTH; j += step_x) {
-      if (pointit_is_color(j,i)) {
+  for (i = context->h - 1; i >= 0; i -= context->step_y) {
+    for (j = 0; j < context->w; j += context->step_x) {
+      if (pointit_is_color(context, j, i)) {
         num_pixels++;
 
-        if (num_pixels > TOLERANCE) {
+        if (num_pixels > context->tolerance) {
           b = i;
 	        get_out = 1;
 	        break;
@@ -216,87 +141,69 @@ void pointit_detect(void) {
   y = t + ((b-t)/2);
 
   if (get_out
-      && (r-l < MAX_DIFF && b-t < MAX_DIFF)
-      && (   (detected_x == -1 && detected_y == -1) ||
-	     (dist(x,y,detected_x,detected_y) <= MAX_DIST)
-	      )
+      && (r-l < context->max_dist && b-t < context->max_diff)
+      /* && ( (dist(x,y,context->dx,context->dy) <= context->max_dist) ) */
       ) {
 
-    detected_diff_x = x - detected_x;
-    detected_diff_y = y - detected_y;
+    context->dx = x - context->x;
+    context->dy = y - context->y;
 
-    detected_x = x;
-    detected_y = y;
+    context->x = x;
+    context->y = y;
 
-    detected_l = l;
-    detected_r = r;
-    detected_t = t;
-    detected_b = b;
+    context->l = l;
+    context->r = r;
+    context->t = t;
+    context->b = b;
 
-    step_x *= 2;
-    step_y *= 2;
+    context->step_x *= 2;
+    context->step_y *= 2;
 
-    if (step_x >= (r-l) / 2) {
-      step_x /= 2;
+    if (context->step_x >= (r-l) / 2) {
+      context->step_x /= 2;
     }
 
-    if (step_y >= (b-t) / 2) {
-      step_y /= 2;
+    if (context->step_y >= (b-t) / 2) {
+      context->step_y /= 2;
     }
 
   } else {
-    if (step_x >= (TOLERANCE / 4)) step_x /= 2;
-    if (step_y >= (TOLERANCE / 4)) step_y /= 2;
+    if (context->step_x >= (context->tolerance / 4)) context->step_x /= 2;
+    if (context->step_y >= (context->tolerance / 4)) context->step_y /= 2;
   }
 
 }
     
-void pointit_toggle_cam() {
-  if (showcam)
-    pointit_hide_cam();
-  else
-    pointit_show_cam();
-  showcam = !showcam;
-}
+struct pointit_context pointit_get_green_context(void) {
+  struct pointit_context context;
 
-int pointit_get_x(void) {
-  return detected_x; 
-}
+  context.x = 0;
+  context.y = 0;
 
-int pointit_get_y(void) {
-  return detected_y; 
-}
+  context.dx = 0;
+  context.dy = 0;
+  
+  context.l = 0;
+  context.r = 0;
+  context.t = 0;
+  context.b = 0;
+  
+  context.w = WIDTH;
+  context.h = HEIGHT;
 
-int pointit_get_left(void) {
-  return detected_l; 
-}
+  context.tolerance = 10;
+  context.max_diff = 80;
+  context.max_dist = 240;
+  context.point_w = 20;
 
-int pointit_get_right(void) {
-  return detected_r;
-}
+  context.step_x = context.tolerance / 4;
+  context.step_y = context.tolerance / 4;
 
-int pointit_get_top(void) {
-  return detected_t;
-} 
+  context.min_h = 75; context.max_h = 140;
+  context.min_s = 40; context.max_s = 255;
+  context.min_v = 30; context.max_v = 255;
 
-int pointit_get_bottom(void) {
-  return detected_b;
-}
-
-int pointit_get_diff_x(void) {
-  return detected_diff_x; 
-}
-
-int pointit_get_diff_y(void) {
-  return detected_diff_y;
-}
-
-int pointit_get_width(void) {
-  return WIDTH;
-}
-
-int pointit_get_height(void) {
-  return HEIGHT;
+  return context;
 }
 
 // vim:ts=2:expandtab:cindent
