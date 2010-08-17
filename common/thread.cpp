@@ -10,6 +10,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
 // GNU General Public License for more details. 
 #include "thread.h"
+#include "../pointit/pointit.h"
 pthread_t detect_thread;
 
 bool *proceed_ptr;
@@ -18,14 +19,13 @@ void *go_detect_thread(void* ptr) {
   //  int cnt = 0;
   //while (!quit) printf("Iter:%d\n",cnt++);
 
-  while((*proceed_ptr)) 
-    reinterpret_cast<PointIt *>(ptr)->do_detect();
-  
+  while(*proceed_ptr)
+    pointit_detect((struct pointit_context*)ptr);
 
   return 0;
 }
 
-void init_thread(PointIt* pntIt, bool* proceed_flag) {
+void init_thread(pointit_context* pntIt, bool* proceed_flag) {
   proceed_ptr = proceed_flag;
   pthread_create( &detect_thread, NULL, go_detect_thread, pntIt);
 }

@@ -25,9 +25,6 @@ init_logic() {
 
   b.resetPos();
 
-  if (pntIt.get_error()) {
-    using_pointit = 0;
-  }
 
   play_music();
   
@@ -40,11 +37,18 @@ init_logic() {
 
 bool
 init_pointit() {
-  quit = false;
-  using_pointit = true;
-  init_thread(&pntIt, &using_pointit);
+  
+  using_pointit = 0;
+  if (pointit_init() == 0) {
+    pntIt = pointit_get_green_context();
+    quit = false;
+    using_pointit = true;
+    init_thread(&pntIt, &using_pointit);
 
-  return pntIt.get_error() == 0;
+    using_pointit = 1;
+  }
+
+   return true;
 }
 
 bool

@@ -10,9 +10,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
 # GNU General Public License for more details. 
 CC=g++
-CFLAGS=-c -Wall -O3
-LDFLAGS=`pkg-config --cflags --libs opencv` -lcv -lcvaux -lhighgui `pkg-config --libs sdl` -lSDL_image -lSDL_mixer -lSDL_ttf -lSDL_gfx -pthread
-SOURCES=globals.cpp init.cpp ../common/thread.cpp audio.cpp pong.cpp pad.cpp ball.cpp ../pointit/pointit.cpp utils.cpp objs.cpp ../common/particle.cpp
+CFLAGS=-c -Wall -ggdb
+LDFLAGS=`pkg-config --libs sdl` -lSDL_image -lSDL_mixer -lSDL_ttf -lSDL_gfx -pthread -DUSING_V4L2
+SOURCES=globals.cpp init.cpp ../common/thread.cpp audio.cpp pong.cpp pad.cpp ball.cpp ../pointit/pointit.c ../pointit/color.c ../pointit/v4l2/v4l2grabber.c utils.cpp objs.cpp ../common/particle.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=pong
 

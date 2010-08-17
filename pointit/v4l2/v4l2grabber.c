@@ -298,7 +298,7 @@ static int init_mmap(void) {
         return -1;
     }
 
-    cam_buffers = calloc (req.count, sizeof(*cam_buffers));
+    cam_buffers = (struct buffer*)calloc (req.count, sizeof(*cam_buffers));
 
     if (!cam_buffers) {
         fprintf(stderr, "Out of memory\n");
@@ -433,7 +433,7 @@ int pointit_init_cap(int w, int h) {
     cam_dev_name = "/dev/video"; 
 
     /* Make room for an RGB bitmap */
-    rgb_img = malloc(cam_width * cam_height * 3); 
+    rgb_img = (unsigned char*)malloc(cam_width * cam_height * 3); 
 
     if (open_device() != 0)     return -1;
     if (init_device() != 0)     return -1;

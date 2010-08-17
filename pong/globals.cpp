@@ -18,9 +18,7 @@ const int SCREEN_BPP = 32;
 const int PAD_WIDTH = 16;
 const int PAD_HEIGHT = 80;
 
-PointIt pntIt;
-
-
+struct pointit_context pntIt;
 
 int oldticks=0;
 int fps=30;

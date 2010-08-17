@@ -71,8 +71,8 @@ int main(void) {
 //        printf("%d, %d\n", pointit_get_x(), pointit_get_y());
         SDL_FillRect( SDL_GetVideoSurface(), NULL, 0 );
         
-        cam = pointit_sdlcam_surf();
-        SDL_BlitSurface( cam, NULL, screen, NULL );
+        //cam = pointit_sdlcam_surf();
+        //SDL_BlitSurface( cam, NULL, screen, NULL );
         
         lineRGBA(screen, pointit.l , 0, pointit.l, screen->h, 0xff, 0x00, 0xff, 0xff);
         lineRGBA(screen, pointit.r, 0, pointit.r, screen->h, 0xff, 0x00, 0xff, 0xff);

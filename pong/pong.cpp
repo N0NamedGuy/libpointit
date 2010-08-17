@@ -9,22 +9,6 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of 
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
 // GNU General Public License for more details. 
-/* Point Pong
- * Copyright (C) 2009 David Serrano
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 #include "pong.h"
 
 float max(float a, float b) {
@@ -41,6 +25,7 @@ void cleanup() {
   SDL_FreeSurface(pointer);
 
   thread_wait();
+  pointit_destroy();  
 
   SDL_Quit();
 }
@@ -120,12 +105,10 @@ void do_logic() {
 void do_pointit() {
   if (using_pointit) {
     //pntIt.do_detect();
-    if (pntIt.get_error() != 0) {
-      using_pointit = 0;
-    } else {
-      pointing.x = (pntIt.get_x() * SCREEN_WIDTH) / pntIt.get_width();
-      pointing.y = (pntIt.get_y() * SCREEN_HEIGHT) / pntIt.get_height();
-    }
+      if (pntIt.w != 0 && pntIt.h != 0) {
+        pointing.x = (pntIt.x * SCREEN_WIDTH) / pntIt.w;
+        pointing.y = (pntIt.y * SCREEN_HEIGHT) / pntIt.h;
+      }
   }
 }
 
@@ -142,10 +125,10 @@ void do_input() {
       case SDLK_LEFT: pointing.x-=10; break;
       case SDLK_RIGHT: pointing.x+=10; break;*/
       case SDLK_f: toggle_fullscreen(); break;
-      case SDLK_l: toggle_pointit(); break;
-      case SDLK_c: pntIt.toggle_cam(); break;
+      //case SDLK_l: toggle_pointit(); break;
+      //case SDLK_c: pntIt.toggle_cam(); break;
       case SDLK_p: paused = !paused; break;
-      case SDLK_d: pntIt.toggle_lines(); break;
+      ////case SDLK_d: pntIt.toggle_lines(); break;
       case SDLK_ESCAPE: quit = true; break;
       default: break;
       }

@@ -26,7 +26,7 @@ extern const int SCREEN_BPP;
 extern const int PAD_WIDTH;
 extern const int PAD_HEIGHT;
 
-extern PointIt pntIt;
+extern pointit_context pntIt;
 /*
 extern Ball b;
 extern Pad p1;
