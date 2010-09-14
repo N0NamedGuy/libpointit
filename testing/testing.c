@@ -99,10 +99,10 @@ int main(void) {
             ((pointit1.y * 480) / pointit1.h) - (target1->h / 2),
             target1, screen);
         
-/*        apply_surface(
+        apply_surface(
             ((pointit2.x * 640) / pointit2.w)  - (target2->w / 2),
             ((pointit2.y * 480) / pointit2.h) - (target2->h / 2),
-            target2, screen);*/
+            target2, screen);
         SDL_Flip( screen );
 
         frames++;

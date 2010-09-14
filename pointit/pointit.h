@@ -33,9 +33,7 @@ struct pointit_context {
 
     /* Tolerances */
     int tolerance; /* How many correct pixels must be jumped */
-    int max_diff;  /* Max difference */
-    int max_dist;  /* Mas dist between lines */
-    int point_w;   /* Max pixel step */
+    int max_dist;  /* Mas distance between lines */
 
     /* Performance jumps */
     int step_y;
