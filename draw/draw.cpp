@@ -1,5 +1,5 @@
-/* nGp Application Suite - Pong
- * Copyright (C) 2009 David Serrano
+/* libpointit - Draw
+ * Copyright (C) 2009, 2010 David Serrano
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 
 using namespace std;
 
-PointIt pntIt;
+struct pointit_context pntIt;
 
 SDL_Rect lastpos = {-1,-1,1,1};
 SDL_Rect pointing = {0,0,1,1};
@@ -92,11 +92,6 @@ load_images() {
 
 bool
 init_logic() {
-
-  if (pntIt.get_error()) {
-    using_pointit = 0;
-  }  
-
   SDL_ShowCursor(0);
   SDL_WarpMouse(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
@@ -107,10 +102,15 @@ init_logic() {
 bool
 init_pointit() {
   quit = false;
-  using_pointit = true;
-  init_thread(&pntIt, &using_pointit);
+  if (pointit_init() != 0) {
+    using_pointit = false;
+  } else {  
+    init_thread(&pntIt, &using_pointit);
+    using_pointit = true;
+    pntIt = pointit_get_green_context();
+  }
 
-  return pntIt.get_error() == 0;
+  return using_pointit;
 }
 
 bool
@@ -276,12 +276,8 @@ void do_logic() {
 void do_pointit() {
   if (using_pointit) {
     //pntIt.do_detect();
-    if (pntIt.get_error() != 0) {
-      using_pointit = 0;
-    } else {
-      pointing.x = (pntIt.get_x() * SCREEN_WIDTH) / pntIt.get_width();
-      pointing.y = (pntIt.get_y() * SCREEN_HEIGHT) / pntIt.get_height();
-    }
+    pointing.x = (pntIt.x * SCREEN_WIDTH) / pntIt.w;
+    pointing.y = (pntIt.y * SCREEN_HEIGHT) / pntIt.h;
   }
 }
 
@@ -299,9 +295,9 @@ void do_input() {
       case SDLK_RIGHT: pointing.x+=10; break;*/
       case SDLK_f: toggle_fullscreen(); break;
       case SDLK_l: toggle_pointit(); break;
-      case SDLK_c: pntIt.toggle_cam(); break;
+      //case SDLK_c: pntIt.toggle_cam(); break;
       case SDLK_SPACE: paused = !paused; break;
-      case SDLK_d: pntIt.toggle_lines(); break;
+      //case SDLK_d: pntIt.toggle_lines(); break;
       case SDLK_e: clear_draw(); break;
 
       case SDLK_s:

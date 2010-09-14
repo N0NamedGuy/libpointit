@@ -8,9 +8,12 @@
 
 SDL_Surface* screen = NULL;
 SDL_Surface* cam = NULL;
-SDL_Surface* target = NULL;
 
-struct pointit_context pointit;
+SDL_Surface* target1 = NULL;
+SDL_Surface* target2 = NULL;
+
+struct pointit_context pointit1;
+struct pointit_context pointit2;
 
 void sigtrap() {
     pointit_destroy();
@@ -51,13 +54,19 @@ int main(void) {
 
     SDL_Init( SDL_INIT_EVERYTHING ); 
     screen = SDL_SetVideoMode( 640, 480, 32, SDL_SWSURFACE );
-    target = load_image("./target.png");
+    target1 = load_image("./pointer1.png");
+    target2 = load_image("./pointer2.png");
     
     if (pointit_init() != 0) {
         printf("An error ocurred while starting pointit\n");
         return 0;
     }
-    pointit = pointit_get_green_context();
+    pointit1 = pointit_get_green_context();
+    pointit2 = pointit_get_blue_context();
+    //pointit = pointit_get_orange_context();
+    //pointit = pointit_get_blue_context();
+    //pointit = pointit_get_pink_context();
+    //pointit = pointit_get_yellow_context();
 
     signal(SIGINT, sigtrap);
     signal(SIGTERM, sigtrap);
@@ -66,23 +75,34 @@ int main(void) {
     newTicks = SDL_GetTicks();
     for (;;) {
         newTicks = SDL_GetTicks();
-        pointit_detect(&pointit);
+        pointit_detect(&pointit1);
+        pointit_detect(&pointit2);
 
 //        printf("%d, %d\n", pointit_get_x(), pointit_get_y());
         SDL_FillRect( SDL_GetVideoSurface(), NULL, 0 );
         
-        //cam = pointit_sdlcam_surf();
-        //SDL_BlitSurface( cam, NULL, screen, NULL );
+        cam = pointit_sdlcam_surf();
+        SDL_BlitSurface( cam, NULL, screen, NULL );
         
-        lineRGBA(screen, pointit.l , 0, pointit.l, screen->h, 0xff, 0x00, 0xff, 0xff);
-        lineRGBA(screen, pointit.r, 0, pointit.r, screen->h, 0xff, 0x00, 0xff, 0xff);
-        lineRGBA(screen, 0, pointit.t, screen->w, pointit.t, 0xff, 0x00, 0xff, 0xff);
-        lineRGBA(screen, 0, pointit.b, screen->w, pointit.b, 0xff, 0x00, 0xff, 0xff);
-
+        lineRGBA(screen, pointit1.l , 0, pointit1.l, screen->h, 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, pointit1.r, 0, pointit1.r, screen->h, 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, 0, pointit1.t, screen->w, pointit1.t, 0xff, 0x00, 0xff, 0xff);
+        lineRGBA(screen, 0, pointit1.b, screen->w, pointit1.b, 0xff, 0x00, 0xff, 0xff);
+/*
+        lineRGBA(screen, pointit2.l , 0, pointit2.l, screen->h, 0xff, 0x00, 0x00, 0xff);
+        lineRGBA(screen, pointit2.r, 0, pointit2.r, screen->h, 0xff, 0x00, 0x00, 0xff);
+        lineRGBA(screen, 0, pointit2.t, screen->w, pointit2.t, 0xff, 0x00, 0x00, 0xff);
+        lineRGBA(screen, 0, pointit2.b, screen->w, pointit2.b, 0xff, 0x00, 0x00, 0xff);
+*/        
         apply_surface(
-            ((pointit.x * 640) / pointit.w)  - (target->w / 2),
-            ((pointit.y * 480) / pointit.h) - (target->h / 2),
-            target, screen);
+            ((pointit1.x * 640) / pointit1.w)  - (target1->w / 2),
+            ((pointit1.y * 480) / pointit1.h) - (target1->h / 2),
+            target1, screen);
+        
+/*        apply_surface(
+            ((pointit2.x * 640) / pointit2.w)  - (target2->w / 2),
+            ((pointit2.y * 480) / pointit2.h) - (target2->h / 2),
+            target2, screen);*/
         SDL_Flip( screen );
 
         frames++;

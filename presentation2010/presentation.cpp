@@ -246,10 +246,6 @@ void clear_surf(SDL_Surface* img) {
 }
 
 void toggle_pointit() {
-  if (!using_pointit) {
-    using_pointit = !init_pointit();
-  }
-
   using_pointit = !using_pointit;
 }
 

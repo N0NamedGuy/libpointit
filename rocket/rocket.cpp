@@ -34,7 +34,7 @@
 
 using namespace std;
 
-PointIt pntIt;
+struct pointit_context pntIt;
 
 SDL_Rect lastpos = {-1,-1,1,1};
 SDL_Rect pointing = {0,0,1,1};
@@ -104,10 +104,6 @@ load_images() {
 bool
 init_logic() {
 
-  if (pntIt.get_error()) {
-    using_pointit = 0;
-  }  
-
   SDL_ShowCursor(0);
   pointing.x = SCREEN_WIDTH / 2 + 100;
   pointing.y = SCREEN_HEIGHT / 2 + 1;
@@ -126,10 +122,14 @@ init_logic() {
 bool
 init_pointit() {
   quit = false;
-  using_pointit = true;
-  init_thread(&pntIt, &using_pointit);
-
-  return pntIt.get_error() == 0;
+  if (pointit_init() == 0) {
+    using_pointit = true;
+    pntIt = pointit_get_green_context();
+    init_thread(&pntIt, &using_pointit);
+  } else {
+    using_pointit = false; 
+  }
+  return using_pointit;
 }
 
 bool
@@ -161,7 +161,7 @@ init() {
   }
 
   if (!init_logic()) {
-    cerr << "Logic not loaded... (WTF??)" << endl;
+    cerr << "Logic not loaded... (WTF?)" << endl;
     return false;
   }
   return true;
@@ -294,12 +294,8 @@ void do_logic() {
 void do_pointit() {
   if (using_pointit) {
     //pntIt.do_detect();
-    if (pntIt.get_error() != 0) {
-      using_pointit = 0;
-    } else {
-      pointing.x = (pntIt.get_x() * SCREEN_WIDTH) / pntIt.get_width();
-      pointing.y = (pntIt.get_y() * SCREEN_HEIGHT) / pntIt.get_height();
-    }
+    pointing.x = (pntIt.x * SCREEN_WIDTH) / pntIt.w;
+    pointing.y = (pntIt.y * SCREEN_HEIGHT) / pntIt.h;
   }
 }
 
@@ -317,8 +313,8 @@ void do_input() {
       case SDLK_RIGHT: pointing.x+=10; break;*/
       case SDLK_f: toggle_fullscreen(); break;
       case SDLK_l: toggle_pointit(); break;
-      case SDLK_c: pntIt.toggle_cam(); break;
-      case SDLK_d: pntIt.toggle_lines(); break;
+      //case SDLK_c: pntIt.toggle_cam(); break;
+      //case SDLK_d: pntIt.toggle_lines(); break;
 
       case SDLK_ESCAPE: quit = true; break;
       default: break;
