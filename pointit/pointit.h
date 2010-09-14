@@ -40,6 +40,7 @@ struct pointit_context {
     /* Performance jumps */
     int step_y;
     int step_x;
+    int dynamic_step;
 
     /* Color ranges */
     int min_h, max_h;
@@ -51,9 +52,10 @@ extern int pointit_init(void);
 extern int pointit_destroy(void); 
 extern void pointit_detect(struct pointit_context* context);
  
-extern struct pointit_context pointit_get_green_context();
-extern struct pointit_context pointit_get_orange_context();
-extern struct pointit_context pointit_get_yellow_context();
-extern struct pointit_context pointit_get_blue_context();
-extern struct pointit_context pointit_get_pink_context();
+extern struct pointit_context pointit_get_default_context(void);
+extern struct pointit_context pointit_get_green_context(void);
+extern struct pointit_context pointit_get_orange_context(void);
+extern struct pointit_context pointit_get_yellow_context(void);
+extern struct pointit_context pointit_get_blue_context(void);
+extern struct pointit_context pointit_get_pink_context(void);
 #endif

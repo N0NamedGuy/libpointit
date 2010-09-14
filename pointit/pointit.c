@@ -79,8 +79,8 @@ void pointit_detect(struct pointit_context* context) {
   }
 
   if (!get_out) {
-    if (context->step_x >= (context->tolerance / 4)) context->step_x /= 2;
-    if (context->step_y >= (context->tolerance / 4)) context->step_y /= 2;
+    if (context->dynamic_step && context->step_x >= (context->tolerance / 4)) context->step_x /= 2;
+    if (context->dynamic_step && context->step_y >= (context->tolerance / 4)) context->step_y /= 2;
     return;
   }
 
@@ -156,25 +156,28 @@ void pointit_detect(struct pointit_context* context) {
     context->t = t;
     context->b = b;
 
-    context->step_x *= 2;
-    context->step_y *= 2;
+    if (context->dynamic_step) {
+      context->step_x *= 2;
+      context->step_y *= 2;
+      
+      if (context->step_x >= (r-l) / 2) {
+        context->step_x /= 2;
+      }
 
-    if (context->step_x >= (r-l) / 2) {
-      context->step_x /= 2;
+      if (context->step_y >= (b-t) / 2) {
+        context->step_y /= 2;
+      }
     }
 
-    if (context->step_y >= (b-t) / 2) {
-      context->step_y /= 2;
-    }
-
-  } else {
+    
+  } else if (context->dynamic_step) {
     if (context->step_x >= (context->tolerance / 4)) context->step_x /= 2;
     if (context->step_y >= (context->tolerance / 4)) context->step_y /= 2;
   }
 
 }
     
-struct pointit_context pointit_get_green_context(void) {
+struct pointit_context pointit_get_default_context(void) {
   struct pointit_context context;
 
   context.x = 0;
@@ -191,13 +194,18 @@ struct pointit_context pointit_get_green_context(void) {
   context.w = WIDTH;
   context.h = HEIGHT;
 
-  context.tolerance = 10;
-  context.max_diff = 80;
   context.max_dist = 240;
   context.point_w = 20;
 
-  context.step_x = context.tolerance / 4;
-  context.step_y = context.tolerance / 4;
+  context.step_x = 1;
+  context.step_y = 1;
+  context.dynamic_step = 0;
+
+  return context;
+}
+
+struct pointit_context pointit_get_green_context(void) {
+  struct pointit_context context = pointit_get_default_context();
 
   context.min_h = 75; context.max_h = 140;
   context.min_s = 40; context.max_s = 255;
@@ -207,29 +215,7 @@ struct pointit_context pointit_get_green_context(void) {
 }
 
 struct pointit_context pointit_get_orange_context(void) {
-  struct pointit_context context;
-
-  context.x = 0;
-  context.y = 0;
-
-  context.dx = 0;
-  context.dy = 0;
-  
-  context.l = 0;
-  context.r = 0;
-  context.t = 0;
-  context.b = 0;
-  
-  context.w = WIDTH;
-  context.h = HEIGHT;
-
-  context.tolerance = 10;
-  context.max_diff = 80;
-  context.max_dist = 240;
-  context.point_w = 20;
-
-  context.step_x = context.tolerance / 4;
-  context.step_y = context.tolerance / 4;
+  struct pointit_context context = pointit_get_default_context();
 
   context.min_h = 20; context.max_h = 30;
   context.min_s = 40; context.max_s = 255;
@@ -239,29 +225,7 @@ struct pointit_context pointit_get_orange_context(void) {
 }
 
 struct pointit_context pointit_get_yellow_context(void) {
-  struct pointit_context context;
-
-  context.x = 0;
-  context.y = 0;
-
-  context.dx = 0;
-  context.dy = 0;
-  
-  context.l = 0;
-  context.r = 0;
-  context.t = 0;
-  context.b = 0;
-  
-  context.w = WIDTH;
-  context.h = HEIGHT;
-
-  context.tolerance = 10;
-  context.max_diff = 80;
-  context.max_dist = 240;
-  context.point_w = 20;
-
-  context.step_x = context.tolerance / 4;
-  context.step_y = context.tolerance / 4;
+  struct pointit_context context = pointit_get_default_context();
 
   context.min_h = 45; context.max_h = 65;
   context.min_s = 40; context.max_s = 255;
@@ -271,29 +235,7 @@ struct pointit_context pointit_get_yellow_context(void) {
 }
 
 struct pointit_context pointit_get_blue_context(void) {
-  struct pointit_context context;
-
-  context.x = 0;
-  context.y = 0;
-
-  context.dx = 0;
-  context.dy = 0;
-  
-  context.l = 0;
-  context.r = 0;
-  context.t = 0;
-  context.b = 0;
-  
-  context.w = WIDTH;
-  context.h = HEIGHT;
-
-  context.tolerance = 10;
-  context.max_diff = 80;
-  context.max_dist = 240;
-  context.point_w = 20;
-
-  context.step_x = context.tolerance / 4;
-  context.step_y = context.tolerance / 4;
+  struct pointit_context context = pointit_get_default_context();
 
   context.min_h = 170; context.max_h = 255;
   context.min_s = 40; context.max_s = 255;
@@ -303,29 +245,7 @@ struct pointit_context pointit_get_blue_context(void) {
 }
 
 struct pointit_context pointit_get_pink_context(void) {
-  struct pointit_context context;
-
-  context.x = 0;
-  context.y = 0;
-
-  context.dx = 0;
-  context.dy = 0;
-  
-  context.l = 0;
-  context.r = 0;
-  context.t = 0;
-  context.b = 0;
-  
-  context.w = WIDTH;
-  context.h = HEIGHT;
-
-  context.tolerance = 10;
-  context.max_diff = 80;
-  context.max_dist = 240;
-  context.point_w = 20;
-
-  context.step_x = context.tolerance / 4;
-  context.step_y = context.tolerance / 4;
+  struct pointit_context context = pointit_get_default_context();
 
   context.min_h = 275; context.max_h = 300;
   context.min_s = 40; context.max_s = 255;
