@@ -6,7 +6,7 @@
 
 #define POINTIT_SDL 1
 
-#include "../pointit/pointit.h"
+#include "pointit.h"
 
 SDL_Surface* screen = NULL;
 SDL_Surface* cam = NULL;
@@ -79,11 +79,11 @@ int main(void) {
         newTicks = SDL_GetTicks();
         pointit_detect(&pointit1);
         //pointit_detect(&pointit2);
-
+http://i.imgur.com/tC95q.jpg
 //        printf("%d, %d\n", pointit_get_x(), pointit_get_y());
         SDL_FillRect( SDL_GetVideoSurface(), NULL, 0 );
         
-        cam = pointit_sdlcam_surf();
+        cam = (SDL_Surface*)pointit_sdlcam_surf();
         SDL_BlitSurface( cam, NULL, screen, NULL );
         
         lineRGBA(screen, pointit1.l , 0, pointit1.l, screen->h, 0xff, 0x00, 0xff, 0xff);

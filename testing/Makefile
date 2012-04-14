@@ -11,8 +11,8 @@
 # GNU General Public License for more details. 
 CC=gcc
 CFLAGS=-c -Wall -ggdb
-LDFLAGS=`pkg-config --libs sdl` -lSDL_image -lSDL_mixer -lSDL_ttf -lSDL_gfx -lpthread -DUSING_V4L2 -DPOINTIT_SDL
-SOURCES=testing.c ../pointit/pointit.c ../pointit/color.c ../pointit/v4l2/v4l2grabber.c
+LDFLAGS=-I../pointit -L../pointit -lpointit `pkg-config --libs sdl` -lSDL_image -lSDL_mixer -lSDL_ttf -lSDL_gfx -lpthread
+SOURCES=testing.c 
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=testing
 
