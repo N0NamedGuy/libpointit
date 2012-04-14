@@ -1,0 +1,9 @@
+Running the demos:
+
+cd to the directory, run make, ./demo
+
+For instance, to run the Pong demo:
+
+cd pong
+make
+./pong
