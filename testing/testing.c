@@ -4,6 +4,8 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_gfxPrimitives.h>
 
+#define POINTIT_SDL 1
+
 #include "../pointit/pointit.h"
 
 SDL_Surface* screen = NULL;
@@ -76,7 +78,7 @@ int main(void) {
     for (;;) {
         newTicks = SDL_GetTicks();
         pointit_detect(&pointit1);
-        pointit_detect(&pointit2);
+        //pointit_detect(&pointit2);
 
 //        printf("%d, %d\n", pointit_get_x(), pointit_get_y());
         SDL_FillRect( SDL_GetVideoSurface(), NULL, 0 );
@@ -88,21 +90,23 @@ int main(void) {
         lineRGBA(screen, pointit1.r, 0, pointit1.r, screen->h, 0xff, 0x00, 0xff, 0xff);
         lineRGBA(screen, 0, pointit1.t, screen->w, pointit1.t, 0xff, 0x00, 0xff, 0xff);
         lineRGBA(screen, 0, pointit1.b, screen->w, pointit1.b, 0xff, 0x00, 0xff, 0xff);
-/*
+
         lineRGBA(screen, pointit2.l , 0, pointit2.l, screen->h, 0xff, 0x00, 0x00, 0xff);
         lineRGBA(screen, pointit2.r, 0, pointit2.r, screen->h, 0xff, 0x00, 0x00, 0xff);
         lineRGBA(screen, 0, pointit2.t, screen->w, pointit2.t, 0xff, 0x00, 0x00, 0xff);
         lineRGBA(screen, 0, pointit2.b, screen->w, pointit2.b, 0xff, 0x00, 0x00, 0xff);
-*/        
+        
+
         apply_surface(
             ((pointit1.x * 640) / pointit1.w)  - (target1->w / 2),
             ((pointit1.y * 480) / pointit1.h) - (target1->h / 2),
             target1, screen);
-        
+
+       
         apply_surface(
             ((pointit2.x * 640) / pointit2.w)  - (target2->w / 2),
             ((pointit2.y * 480) / pointit2.h) - (target2->h / 2),
-            target2, screen);
+            target2, screen); 
         SDL_Flip( screen );
 
         frames++;
