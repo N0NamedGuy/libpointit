@@ -430,7 +430,7 @@ int pointit_init_cap(int w, int h) {
     /* TODO: Make this load from a config file */
     cam_width = w;
     cam_height = h;
-    cam_dev_name = "/dev/video"; 
+    cam_dev_name = "/dev/video0"; 
 
     /* Make room for an RGB bitmap */
     rgb_img = (unsigned char*)malloc(cam_width * cam_height * 3); 
